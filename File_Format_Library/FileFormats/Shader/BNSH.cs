@@ -45,6 +45,7 @@ namespace FirstPlugin
             header.Read(new FileReader(stream), this);
 
             Text = header.FileName + ".bnsh";
+            Console.WriteLine("Did load header " + Text);
         }
         public void Unload()
         {
@@ -75,6 +76,8 @@ namespace FirstPlugin
 
             public void Read(FileReader reader, TreeNodeCustom node)
             {
+                Console.WriteLine("reader at position: " + reader.Position);
+                
                 reader.ByteOrder = Syroot.BinaryData.ByteOrder.LittleEndian;
 
                 reader.ReadSignature(4, "BNSH");
@@ -99,11 +102,20 @@ namespace FirstPlugin
                 uint VariationCount = reader.ReadUInt32();
                 long VariationOffset = reader.ReadUInt32();
 
+                Console.WriteLine("FileName:" + FileName + " FileSize:" + FileSize + " VariationCount:" + VariationCount);
+                Console.WriteLine("VariationOffset: {0:x}", VariationOffset);
+
+
                 reader.Seek(VariationOffset, SeekOrigin.Begin);
                 for (int i = 0; i < VariationCount; i++)
                 {
                     ShaderVariation var = new ShaderVariation();
                     var.Text = "Shader Variation" + i;
+                    Console.WriteLine();
+                    Console.WriteLine("will read Shader Variation" + i);
+                    if (i == 24) {
+                        Console.WriteLine("Break!");
+                    }
                     var.Read(reader);
                     ShaderVariations.Add(var);
                     node.Nodes.Add(var);
@@ -182,6 +194,7 @@ namespace FirstPlugin
                 long FragmentShaderOffset = reader.ReadInt64();
                 long ComputeShaderOffset = reader.ReadInt64();
                 long pos = reader.Position;
+                Console.WriteLine("VertexShaderOffset:{0:x} FragmentShaderOffset:{1:x} pos:{2:x}", VertexShaderOffset, FragmentShaderOffset, pos);
 
                 if (Format == 3)
                 {
@@ -320,11 +333,13 @@ namespace FirstPlugin
 
             public virtual void Read(FileReader reader)
             {
+                Console.WriteLine("reader at position:{0:x}", reader.Position);
                 reader.Seek(8);
                 long ShaderOffset = reader.ReadInt64();
                 long ShaderOffset2 = reader.ReadInt64();
                 int ShaderSize = reader.ReadInt32();
                 int ShaderSize2 = reader.ReadInt32();
+                Console.WriteLine("ShaderOffset1:{0:x} 2:{1:x} Size1:{1:x} Size2:{2:x}", ShaderOffset, ShaderOffset2, ShaderSize, ShaderSize2);
                 reader.Seek(0x20);
 
                 Address = (ulong)ShaderSize2;
